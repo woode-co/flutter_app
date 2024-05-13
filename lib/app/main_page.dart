@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  final bool userSex;
+  final List<bool> userTastes;
+  const MainPage({
+    Key? key,
+    required this.userSex,
+    required this.userTastes,
+  }) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -10,20 +16,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   @override
-  void initState() {
-
-
-  }
-
-  @override
-  void dispose() {
-
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text("main page")
+      body: Text('main page, Gender: ${widget.userSex ? "Male" : "Female"}'),
     );
   }
 }

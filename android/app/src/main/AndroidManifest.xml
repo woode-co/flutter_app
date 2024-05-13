@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <users-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="woodeco"
@@ -19,6 +19,7 @@
                 <data android:scheme="kakao816b6c407a299db3d999c961bfd82dc3" android:host="oauth"/>
             </intent-filter>
         </activity>
+
 
         <activity
             android:name=".MainActivity"

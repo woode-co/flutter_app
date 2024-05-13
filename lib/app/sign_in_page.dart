@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:woodeco/app/main_view_model.dart';
 import 'package:woodeco/app/kakao_login.dart';
-
+import 'package:flutter_svg/svg.dart';
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
 
@@ -26,14 +26,14 @@ class _SignInPageState extends State<SignInPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start, // Left alignment
             children: <Widget>[
-              SizedBox(height: 100), // Top margin for logo
+              SizedBox(height: 200), // Top margin for logo
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(
                     '우데코',
                     style: TextStyle(
-                      fontSize: 40,
+                      fontSize: 48,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -41,18 +41,18 @@ class _SignInPageState extends State<SignInPage> {
                   Text(
                     '우리들의\n데이트 코스',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       color: Colors.grey[600],
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 50),
+              SizedBox(height: 100),
               RichText(
                 text: TextSpan(
                   text: '당신을 생각하는\n',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     color: Colors.grey[800],
                     fontFamily: 'Roboto', // Assuming Roboto, change as needed
                   ),
@@ -64,25 +64,25 @@ class _SignInPageState extends State<SignInPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 60),
+              SizedBox(height: 100),
               Center( // Centering SignIn Buttons
                 child: Column(
                   children: <Widget>[
-                    Image.network(viewModel.user?.kakaoAccount?.profile?.profileImageUrl ?? ''),
-                    Text('${viewModel.isLogined}'),
-                    ElevatedButton(
-                      onPressed: () async {
+                    Text('카카오 로그인 여부 : ${viewModel.isLogined}'),
+                    SizedBox(height:30),
+                    InkWell(
+                      onTap: () async {
                         await viewModel.login();
                         setState(() {});
+                        if (viewModel.isLogined){
+                          Navigator.of(context).pushNamed('/signup');
+                        }
                       },
-                      child: Text('Kakao Login')
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await viewModel.logout();
-                        setState(() {});
-                      },
-                      child: Text('Kakao Logout')
+                      child: SvgPicture.asset(
+                        'images/kakao_login.svg',
+                        width: MediaQuery.of(context).size.width,
+                        fit: BoxFit.contain
+                      ),
                     ),
                   ],
                 ),
