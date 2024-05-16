@@ -116,7 +116,6 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
           ),
           width: MediaQuery.of(context).size.width,
           height: _height,
-          child: SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 20),
@@ -183,7 +182,6 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                 ),
               ],
             ),
-          ),
         ),
       ),
     );
