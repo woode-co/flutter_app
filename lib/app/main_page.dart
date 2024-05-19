@@ -16,6 +16,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  bool _isButtonPressed = false;
+
+  void _togleButton(){
+    setState((){
+      _isButtonPressed = !_isButtonPressed;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,7 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -39,11 +46,36 @@ class _MainPageState extends State<MainPage> {
             child: IconButton(
               icon: Image.asset('assets/woodeco_logo.png'),
               iconSize: 40,
-              onPressed: (){
-              },
+              onPressed: _togleButton,
             ),
           ),
-          const MapBottomSheet()
+          if(_isButtonPressed)
+            const Center(
+              
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                
+                children: [
+                  SizedBox(height: 300),
+                  SizedBox(height:20),
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text('AI에게 추천받는 중', style: TextStyle(fontSize: 16),),
+                ]
+              ),
+            ),
+          if(!_isButtonPressed)
+            const Center(
+              child: Column(
+                children: [
+                  SizedBox(height: 300),
+                  SizedBox(height:20),
+                  SizedBox(height: 10),
+                  Text('터치하여 데이트하기', style: TextStyle(fontSize: 16),),
+                ]
+              ),
+            ),
+            const MapBottomSheet()
         ],
       )
     );
@@ -69,8 +101,8 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   bool _longAnimation = false;
 
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _startTime = TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTime = TimeOfDay(hour: 18, minute: 0);
+  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 18, minute: 0);
   final TextEditingController _locationController = TextEditingController();
 
   @override
@@ -169,37 +201,37 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                   Expanded(
                     child: TextField(
                       controller: _locationController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Location',
                         labelText: '현재 위치',
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.search),
+                    icon: const Icon(Icons.search),
                     onPressed: () {
                       // Location search logic
                     },
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               
               // Date Selection
-              Text('데이트할 날짜를 선택해 주세요!'),
+              const Text('데이트할 날짜를 선택해 주세요!'),
               Row(
                 children: [
                   Text(DateFormat('yyyy-MM-dd').format(_selectedDate)),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: const Icon(Icons.calendar_today),
                     onPressed: () => _selectDate(context),
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               
               // Time Selection
-              Text('데이트 시간을 정해주세요!'),
+              const Text('데이트 시간을 정해주세요!'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -208,7 +240,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                       Text('시작 시간: ${_startTime.format(context)}'),
                       ElevatedButton(
                         onPressed: () => _selectTime(context, true),
-                        child: Text('Select Start Time'),
+                        child: const Text('Select Start Time'),
                       ),
                     ],
                   ),
@@ -217,7 +249,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                       Text('끝나는 시간: ${_endTime.format(context)}'),
                       ElevatedButton(
                         onPressed: () => _selectTime(context, false),
-                        child: Text('Select End Time'),
+                        child: const Text('Select End Time'),
                       ),
                     ],
                   ),
