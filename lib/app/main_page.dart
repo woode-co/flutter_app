@@ -115,7 +115,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
       }
     });
   }
-  
+
   void _onDragEnd(DragEndDetails details) {
     setState(() {
       if (_height < (MediaQuery.of(context).size.height / 2)) {
@@ -186,18 +186,15 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
               ),
               const SizedBox(height: 10),
               const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 16.0),
-                          child: Text(
-                            '설정',
-                            style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ),
-                      ),
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 16.0),
+                  child: Text(
+                    '설정',
+                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -228,8 +225,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                       const Text(
                         '데이트할 날짜를 선택해 주세요!',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
@@ -246,8 +242,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                       const Text(
                         '데이트 시간을 정해주세요!',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -283,5 +278,3 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
     );
   }
 }
-
-
