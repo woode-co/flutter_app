@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'woodeco',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/result',
+      initialRoute: '/main',
       routes: {
         '/main': (context) {
           final routeSettings = ModalRoute.of(context)!.settings;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'map_screen.dart'; // Import the MapScreen file
 
 class MainPage extends StatefulWidget {
   final bool userSex;
@@ -214,6 +215,10 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                           IconButton(
                             icon: const Icon(Icons.search),
                             onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const MapScreen()),
+                              );
                               // Location search logic
                             },
                           ),
