@@ -10,25 +10,14 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _controller;
-  final LatLng _initialPosition = const LatLng(37.7749, -122.4194); // Default to San Francisco
+  final LatLng _initialPosition = const LatLng(37.5642, 127.0016); // Default to a location
   late LatLng _lastMapPosition;
-  late Marker _marker;
   bool _isMapCreated = false;
 
   @override
   void initState() {
     super.initState();
     _lastMapPosition = _initialPosition;
-    _marker = Marker(
-      markerId: const MarkerId('selected-location'),
-      position: _initialPosition,
-      draggable: true,
-      onDragEnd: (LatLng newPosition) {
-        setState(() {
-          _lastMapPosition = newPosition;
-        });
-      },
-    );
   }
 
   @override
@@ -37,17 +26,21 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text('Select Location on Map'),
       ),
-      body: _isMapCreated
-          ? GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: _initialPosition,
-                zoom: 10.0,
-              ),
-              markers: {_marker},
-              onCameraMove: _onCameraMove,
-            )
-          : const Center(child: CircularProgressIndicator()),
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _initialPosition,
+              zoom: 15.0,
+            ),
+            markers: {_createMarker()},
+            onCameraMove: _onCameraMove,
+          ),
+          if (!_isMapCreated)
+            const Center(child: CircularProgressIndicator()),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _confirmLocation,
         tooltip: 'Confirm Location',
@@ -66,22 +59,26 @@ class _MapScreenState extends State<MapScreen> {
   void _onCameraMove(CameraPosition position) {
     if (_isMapCreated) {
       setState(() {
-        _marker = Marker(
-          markerId: const MarkerId('selected-location'),
-          position: position.target,
-          draggable: true,
-          onDragEnd: (LatLng newPosition) {
-            setState(() {
-              _lastMapPosition = newPosition;
-            });
-          },
-        );
+        _lastMapPosition = position.target;
       });
     }
   }
 
+  Marker _createMarker() {
+    return Marker(
+      markerId: const MarkerId('selected-location'),
+      position: _lastMapPosition,
+      draggable: true,
+      onDragEnd: (LatLng newPosition) {
+        setState(() {
+          _lastMapPosition = newPosition;
+        });
+      },
+    );
+  }
+
   void _confirmLocation() {
-    // Handle location confirmation logic here
-    print('Selected location: ${_lastMapPosition.latitude}, ${_lastMapPosition.longitude}');
-    }
+    // Return the selected location to the previous screen
+    Navigator.pop(context, _lastMapPosition);
+  }
 }

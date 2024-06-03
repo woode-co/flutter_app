@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'map_screen.dart'; // Import the MapScreen file
 
 class MainPage extends StatefulWidget {
@@ -98,12 +99,18 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 18, minute: 0);
+  LatLng _selectedLocation = const LatLng(37.5642, 127.0016); // Default location
   final TextEditingController _locationController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _height = _lowLimit;
+    _updateLocationText();
+  }
+
+  void _updateLocationText() {
+    _locationController.text = 'Lat: ${_selectedLocation.latitude}, Lng: ${_selectedLocation.longitude}';
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
@@ -153,6 +160,19 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
         } else {
           _endTime = picked;
         }
+      });
+    }
+  }
+
+  Future<void> _selectLocation(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MapScreen()),
+    );
+    if (result != null) {
+      setState(() {
+        _selectedLocation = result as LatLng;
+        _updateLocationText();
       });
     }
   }
@@ -210,17 +230,12 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                                 hintText: 'Location',
                                 labelText: '현재 위치',
                               ),
+                              readOnly: true,
                             ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.search),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const MapScreen()),
-                              );
-                              // Location search logic
-                            },
+                            onPressed: () => _selectLocation(context),
                           ),
                         ],
                       ),

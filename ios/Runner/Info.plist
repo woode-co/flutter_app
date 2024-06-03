@@ -53,5 +53,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+    	<key>NSAllowsArbitraryLoads</key>
+    	<true/>
+	</dict>
+
+
+	<key>GMSApiKey</key>
+	<string>AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw</string>
+
+
 </dict>
 </plist>
