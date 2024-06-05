@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'result_map.dart';
 
 class ResultPage extends StatefulWidget {
   const ResultPage({Key? key}) : super(key: key);
@@ -16,12 +17,10 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         body: Stack(children: [
-      Container(
-        color: const Color.fromARGB(255, 25, 15, 15),
-      ),
-      const MapBottomSheet()
+          ResultMap(),
+          MapBottomSheet()
     ]));
   }
 }

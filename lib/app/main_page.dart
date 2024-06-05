@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'map_screen.dart'; // Import the MapScreen file
 
 class MainPage extends StatefulWidget {
@@ -19,11 +21,76 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   bool _isButtonPressed = false;
+  LatLng _currentPosition = const LatLng(37.5642, 127.0016); // Default to Seoul
+  final TextEditingController _locationController = TextEditingController();
 
-  void _togleButton() {
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled, don't continue
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, don't continue
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    } 
+
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _currentPosition = LatLng(position.latitude, position.longitude);
+      _updateLocationText();
+    });
+  }
+
+  void _toggleButton() {
     setState(() {
       _isButtonPressed = !_isButtonPressed;
     });
+  }
+
+  void _updateLocationText() async {
+    String address = await _getAddressFromLatLng(_currentPosition);
+    setState(() {
+      _locationController.text = address;
+    });
+  }
+
+  Future<String> _getAddressFromLatLng(LatLng latLng) async {
+    const String apiKey = 'YOUR_API_KEY_HERE';  // Replace with your Google Maps API key
+    final String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        return data['results'][0]['formatted_address'];
+      } else {
+        return 'No address available';
+      }
+    } else {
+      throw Exception('Failed to load address');
+    }
   }
 
   @override
@@ -45,7 +112,7 @@ class _MainPageState extends State<MainPage> {
             child: IconButton(
               icon: Image.asset('assets/woodeco_logo.png'),
               iconSize: 40,
-              onPressed: _togleButton,
+              onPressed: _toggleButton,
             ),
           ),
           if (_isButtonPressed)
@@ -75,7 +142,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ]),
             ),
-          if (!_isButtonPressed) const MapBottomSheet(),
+          if (!_isButtonPressed) MapBottomSheet(currentPosition: _currentPosition, locationController: _locationController),
         ],
       ),
     );
@@ -83,7 +150,10 @@ class _MainPageState extends State<MainPage> {
 }
 
 class MapBottomSheet extends StatefulWidget {
-  const MapBottomSheet({super.key});
+  final LatLng currentPosition;
+  final TextEditingController locationController;
+
+  const MapBottomSheet({Key? key, required this.currentPosition, required this.locationController}) : super(key: key);
 
   @override
   State<MapBottomSheet> createState() => _MapBottomSheetState();
@@ -99,18 +169,38 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 18, minute: 0);
-  LatLng _selectedLocation = const LatLng(37.5642, 127.0016); // Default location
-  final TextEditingController _locationController = TextEditingController();
+  late LatLng _currentPosition;  // 상태 변수로 선언
 
   @override
   void initState() {
     super.initState();
     _height = _lowLimit;
+    _currentPosition = widget.currentPosition;  // 초기화
     _updateLocationText();
   }
 
-  void _updateLocationText() {
-    _locationController.text = 'Lat: ${_selectedLocation.latitude}, Lng: ${_selectedLocation.longitude}';
+  void _updateLocationText() async {
+    String address = await _getAddressFromLatLng(_currentPosition);
+    setState(() {
+      widget.locationController.text = address;
+    });
+  }
+
+  Future<String> _getAddressFromLatLng(LatLng latLng) async {
+    const String apiKey = 'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw';  // Replace with your Google Maps API key
+    final String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        return data['results'][0]['formatted_address'];
+      } else {
+        return 'No address available';
+      }
+    } else {
+      throw Exception('Failed to load address');
+    }
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
@@ -171,7 +261,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
     );
     if (result != null) {
       setState(() {
-        _selectedLocation = result as LatLng;
+        _currentPosition = result as LatLng;  // 상태 변수 업데이트
         _updateLocationText();
       });
     }
@@ -225,7 +315,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _locationController,
+                              controller: widget.locationController,
                               decoration: const InputDecoration(
                                 hintText: 'Location',
                                 labelText: '현재 위치',
