@@ -6,6 +6,9 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw"/>
+
         <activity
             android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity"
             android:exported="true">
