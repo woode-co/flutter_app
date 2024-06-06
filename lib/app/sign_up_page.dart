@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:woodeco/app/token_manager.dart' as woodeco_token_manager;
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -43,6 +46,35 @@ class _SignUpPageState extends State<SignUpPage> {
       setState(() {
         selectedDate = picked;
       });
+    }
+  }
+
+  Future<void> _submitData() async {
+    String? userId = woodeco_token_manager.TokenManager.instance.accessToken;
+    if (userId == null){
+      print("No access token available");
+      return;
+    }
+    String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+    var url = Uri.parse('http://49.247.34.221:8000/signup/');
+    var response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'user_id': userId,
+        'birth': formattedDate,
+        'sex': isMale,
+        'tastes': isSelected,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pushNamed(context, '/main');
+    } else {
+      // Handle error
+      print('Failed to create user');
     }
   }
 
@@ -222,16 +254,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     borderRadius: BorderRadius.circular(10),  // BorderRadius를 10으로 설정
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/main',
-                    arguments: {
-                      'userSex': isMale,
-                      'userTastes': isSelected,
-                    }
-                  );
-                },
+                onPressed: _submitData,
                 child: Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),

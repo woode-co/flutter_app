@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'result_map.dart';
 
 class ResultPage extends StatefulWidget {
-  const ResultPage({Key? key}) : super(key: key);
+  final Map<String, dynamic> result;
+
+  const ResultPage({Key? key, required this.result}) : super(key: key);
 
   @override
   _ResultPageState createState() => _ResultPageState();
@@ -10,23 +15,29 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   @override
-  void initState() {}
+  void initState() {
+    super.initState();
+  }
 
   @override
-  void dispose() {}
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
         body: Stack(children: [
-          ResultMap(),
-          MapBottomSheet()
-    ]));
+          ResultMap(result: widget.result),
+          MapBottomSheet(result: widget.result),
+        ]));
   }
 }
 
 class MapBottomSheet extends StatefulWidget {
-  const MapBottomSheet({super.key});
+  final Map<String, dynamic> result;
+
+  const MapBottomSheet({Key? key, required this.result}) : super(key: key);
 
   @override
   State<MapBottomSheet> createState() => _MapBottomSheetState();
@@ -39,27 +50,31 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   final double _lowLimit = 100;
   final double _highLimit = 800;
 
-  List<String> places = ["현재 위치", "동대문엽기떡볶이 본점", "청계천", "스타벅스 광화문점"];
-  List<String> addresses = [
-    "서울특별시 중구 퇴계로 75길 7",
-    "서울특별시 중구 퇴계로 75길 8",
-    "서울특별시 종로구",
-    "서울특별시 종로구 세종대로 167"
-  ];
-  List<IconData> icons = [
-    Icons.my_location,
-    Icons.local_dining,
-    Icons.park,
-    Icons.local_cafe
-  ];
-  List<String> travelTimes = ["3분", "2분", "43분"];
-
-  final bool _longAnimation = false;
-
   @override
   void initState() {
     super.initState();
     _height = _lowLimit;
+  }
+
+  Future<List<String>> _fetchAddresses(List<LatLng> latLngs) async {
+    return await Future.wait(latLngs.map((latLng) => _getAddressFromLatLng(latLng)).toList());
+  }
+
+  Future<String> _getAddressFromLatLng(LatLng latLng) async {
+    const String apiKey = 'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw';  // Replace with your Google Maps API key
+    final String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        return data['results'][0]['formatted_address'];
+      } else {
+        return 'No address available';
+      }
+    } else {
+      throw Exception('Failed to load address');
+    }
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
@@ -83,8 +98,29 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
     });
   }
 
+  IconData getIconFromPlace(String category) {
+    switch (category) {
+      case 'cafe':
+        return Icons.local_cafe;
+      case 'landmark':
+        return Icons.location_city;
+      case 'food':
+        return Icons.restaurant;
+      case 'culture':
+        return Icons.museum;
+      default:
+        return Icons.place; // Default icon if no match is found
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> itinerary = List<Map<String, dynamic>>.from(widget.result['itinerary']);
+    List<LatLng> latLngs = itinerary.map<LatLng>((item) => LatLng(item['x'], item['y'])).toList();  // Note: LatLng uses (latitude, longitude)
+    List<String> places = itinerary.map<String>((item) => item['location'] as String).toList();
+    List<IconData> icons = List.generate(places.length, (index) => getIconFromPlace(itinerary[index]['category']));  // Placeholder icons
+    List<int> travelTimes = List<int>.from(widget.result['durations']);
+
     return Positioned(
       bottom: 0.0,
       child: GestureDetector(
@@ -100,84 +136,89 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
           ),
           width: MediaQuery.of(context).size.width,
           height: _height,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Container(
-                width: 70,
-                height: 4.5,
-                decoration: const BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: FutureBuilder<List<String>>(
+            future: _fetchAddresses(latLngs),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Center(child: Text('Failed to load addresses'));
+              } else {
+                List<String> addresses = snapshot.data ?? [];
+                return Column(
                   children: [
-                    const Text(
-                      '추천 데이트 코스',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    const SizedBox(height: 20),
+                    Container(
+                      width: 70,
+                      height: 4.5,
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        '편집',
-                        style: TextStyle(color: Colors.blue),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '추천 데이트 코스',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: places.length + travelTimes.length,
+                              itemBuilder: (context, index) {
+                                if (index % 2 == 0) {
+                                  int placeIndex = index ~/ 2;
+                                  return _buildPlaceItemWithTime(
+                                    icon: icons[placeIndex],
+                                    title: places[placeIndex],
+                                    address: addresses[placeIndex],
+                                    time: placeIndex == 0
+                                        ? ' '
+                                        : '${travelTimes[placeIndex - 1]}분', // Add time for all except the first item
+                                  );
+                                } else {
+                                  return const SizedBox
+                                      .shrink(); // Empty widget for odd indices, no need for travel time row anymore
+                                }
+                              },
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.directions_walk),
+                                label: Text('이동시간 ${travelTimes.reduce((a, b) => a + b)}분'),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(double.infinity, 50),
+                                  backgroundColor: Colors.blue,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height:10),
+                          ],
+
+                        ),
                       ),
                     ),
                   ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: places.length + travelTimes.length,
-                        itemBuilder: (context, index) {
-                          if (index % 2 == 0) {
-                            int placeIndex = index ~/ 2;
-                            return _buildPlaceItemWithTime(
-                              icon: icons[placeIndex],
-                              title: places[placeIndex],
-                              address: addresses[placeIndex],
-                              time: placeIndex == 0
-                                  ? ''
-                                  : travelTimes[placeIndex -
-                                      1], // Add time for all except the first item
-                            );
-                          } else {
-                            return const SizedBox
-                                .shrink(); // Empty widget for odd indices, no need for travel time row anymore
-                          }
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.directions_walk),
-                          label: const Text('이동시간 48분'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 50),
-                            backgroundColor: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                );
+              }
+            },
           ),
         ),
       ),
@@ -190,27 +231,40 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
     required String address,
     required String time,
   }) {
-    return Row(
-      children: [
-        if (time.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                const Icon(Icons.directions_walk, color: Colors.grey),
-                const SizedBox(height: 4),
-                Text(time, style: const TextStyle(color: Colors.grey)),
-              ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0,0,0,10),
+      child: Row(
+        children: [
+          if (time != ' ')
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+              child: Column(
+                children: [
+                  const Icon(Icons.directions_walk, color: Colors.grey),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 40, // 고정된 가로 너비를 설정
+                    alignment: Alignment.center,
+                    child: Text(
+                      time,
+                      style: const TextStyle(color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          if(time == ' ')
+            SizedBox(width: 50),
+          Expanded(
+            child: ListTile(
+              leading: Icon(icon, color: Colors.red),
+              title: Text(title),
+              subtitle: Text(address),
             ),
           ),
-        Expanded(
-          child: ListTile(
-            leading: Icon(icon, color: Colors.red),
-            title: Text(title),
-            subtitle: Text(address),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

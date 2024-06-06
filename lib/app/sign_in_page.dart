@@ -3,6 +3,7 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:woodeco/app/main_view_model.dart';
 import 'package:woodeco/app/kakao_login.dart';
 import 'package:flutter_svg/svg.dart';
+
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
 
@@ -11,9 +12,12 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-
   final viewModel = MainViewModel(KakaoLogin());
 
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +28,9 @@ class _SignInPageState extends State<SignInPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start, // Left alignment
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const SizedBox(height: 200), // Top margin for logo
+              const SizedBox(height: 200),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -37,7 +41,7 @@ class _SignInPageState extends State<SignInPage> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(width: 10), // Space between "우데코" and its description
+                  const SizedBox(width: 10),
                   Text(
                     '우리들의\n데이트 코스',
                     style: TextStyle(
@@ -54,7 +58,7 @@ class _SignInPageState extends State<SignInPage> {
                   style: TextStyle(
                     fontSize: 20,
                     color: Colors.grey[800],
-                    fontFamily: 'Roboto', // Assuming Roboto, change as needed
+                    fontFamily: 'Roboto',
                   ),
                   children: const <TextSpan>[
                     TextSpan(
@@ -65,23 +69,28 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               const SizedBox(height: 100),
-              Center( // Centering SignIn Buttons
+              Center(
                 child: Column(
                   children: <Widget>[
                     Text('카카오 로그인 여부 : ${viewModel.isLogined}'),
-                    const SizedBox(height:30),
+                    const SizedBox(height: 30),
                     InkWell(
                       onTap: () async {
                         await viewModel.login();
+                        if (viewModel.isLogined) {
+                          bool tokenExists = await viewModel.verifyTokenWithServer();
+                          if (tokenExists) {
+                            Navigator.of(context).pushNamed('/main');
+                          } else {
+                            Navigator.of(context).pushNamed('/signup');
+                          }
+                        }
                         setState(() {});
-                        //if (viewModel.isLogined){
-                          Navigator.of(context).pushNamed('/signup');
-                        //}
                       },
                       child: SvgPicture.asset(
                         'images/kakao_login.svg',
                         width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.contain
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],

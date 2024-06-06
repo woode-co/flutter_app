@@ -19,27 +19,28 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'woodeco',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/result',
-      routes: {
-        '/main': (context) {
-          final routeSettings = ModalRoute.of(context)!.settings;
-          final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
-
-          // isMale 인자를 bool로 받고, 기본값은 true
-          final bool userSex = args['userSex'] as bool? ?? true;
-
-          // isSelected 인자를 List<bool>로 받고, 기본값은 길이 7의 모두 true인 리스트
-          final List<bool> userTastes = args['userTastes'] as List<bool>? ?? [true, true, true, true, true, true, true];
-
-          return MainPage(
-            userSex: userSex, // 남자인지 여부
-            userTastes: userTastes, // 취향 선택지 중에서 전자를 선택했는지 여부
+      initialRoute: '/signin',
+      onGenerateRoute: (settings) {
+        if (settings.name == '/result') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) {
+              return ResultPage(result: args);
+            },
           );
-        },
-        '/signin': (context) => const SignInPage(),
-        '/signup': (context) => const SignUpPage(),
-        '/result': (context) => const ResultPage(),
-      }
+        }
+        // Handle other routes here
+        switch (settings.name) {
+          case '/main':
+            return MaterialPageRoute(builder: (context) => const MainPage());
+          case '/signin':
+            return MaterialPageRoute(builder: (context) => const SignInPage());
+          case '/signup':
+            return MaterialPageRoute(builder: (context) => const SignUpPage());
+          default:
+            return null;
+        }
+      },
     );
   }
 }
