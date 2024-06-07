@@ -72,7 +72,7 @@ class _SignInPageState extends State<SignInPage> {
               Center(
                 child: Column(
                   children: <Widget>[
-                    Text('카카오 로그인 여부 : ${viewModel.isLogined}'),
+                    // Text('카카오 로그인 여부 : ${viewModel.isLogined}'),
                     const SizedBox(height: 30),
                     InkWell(
                       onTap: () async {
