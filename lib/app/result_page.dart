@@ -27,10 +27,13 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(children: [
+      body: Stack(
+        children: [
           ResultMap(result: widget.result),
           MapBottomSheet(result: widget.result),
-        ]));
+        ],
+      ),
+    );
   }
 }
 
@@ -57,12 +60,15 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   }
 
   Future<List<String>> _fetchAddresses(List<LatLng> latLngs) async {
-    return await Future.wait(latLngs.map((latLng) => _getAddressFromLatLng(latLng)).toList());
+    return await Future.wait(
+      latLngs.map((latLng) => _getAddressFromLatLng(latLng)).toList(),
+    );
   }
 
   Future<String> _getAddressFromLatLng(LatLng latLng) async {
-    const String apiKey = 'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw';  // Replace with your Google Maps API key
-    final String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
+    const String apiKey = 'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw'; // Replace with your Google Maps API key
+    final String url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -115,10 +121,19 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> itinerary = List<Map<String, dynamic>>.from(widget.result['itinerary']);
-    List<LatLng> latLngs = itinerary.map<LatLng>((item) => LatLng(item['x'], item['y'])).toList();  // Note: LatLng uses (latitude, longitude)
-    List<String> places = itinerary.map<String>((item) => item['location'] as String).toList();
-    List<IconData> icons = List.generate(places.length, (index) => getIconFromPlace(itinerary[index]['category']));  // Placeholder icons
+    List<Map<String, dynamic>> itinerary =
+    List<Map<String, dynamic>>.from(widget.result['itinerary']);
+    List<LatLng> latLngs = itinerary
+        .map<LatLng>((item) => LatLng(item['x'], item['y']))
+        .toList(); // Note: LatLng uses (latitude, longitude)
+    List<String> places =
+    itinerary.map<String>((item) => item['location'] as String).toList();
+    List<String> reasons = List<Map<String, dynamic>>.from(widget.result['reasoning'])
+        .map<String>((item) => item['reason'] as String)
+        .toList();
+
+    List<IconData> icons = List.generate(
+        places.length, (index) => getIconFromPlace(itinerary[index]['category'])); // Placeholder icons
     List<int> travelTimes = List<int>.from(widget.result['durations']);
 
     return Positioned(
@@ -158,7 +173,8 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                     ),
                     const SizedBox(height: 10),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -179,22 +195,18 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                             ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: places.length + travelTimes.length,
+                              itemCount: places.length,
                               itemBuilder: (context, index) {
-                                if (index % 2 == 0) {
-                                  int placeIndex = index ~/ 2;
-                                  return _buildPlaceItemWithTime(
-                                    icon: icons[placeIndex],
-                                    title: places[placeIndex],
-                                    address: addresses[placeIndex],
-                                    time: placeIndex == 0
-                                        ? ' '
-                                        : '${travelTimes[placeIndex - 1]}분', // Add time for all except the first item
-                                  );
-                                } else {
-                                  return const SizedBox
-                                      .shrink(); // Empty widget for odd indices, no need for travel time row anymore
-                                }
+                                return PlaceItem(
+                                  index: index,
+                                  icon: icons[index],
+                                  title: places[index],
+                                  address: addresses[index],
+                                  time: index == 0
+                                      ? ' '
+                                      : '${travelTimes[index - 1]}분', // Add time for all except the first item
+                                  reason: reasons[index],
+                                );
                               },
                             ),
                             Padding(
@@ -202,16 +214,16 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                               child: ElevatedButton.icon(
                                 onPressed: () {},
                                 icon: const Icon(Icons.directions_walk),
-                                label: Text('이동시간 ${travelTimes.reduce((a, b) => a + b)}분'),
+                                label: Text(
+                                    '총 이동시간 ${travelTimes.reduce((a, b) => a + b)}분'),
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 50),
                                   backgroundColor: Colors.blue,
                                 ),
                               ),
                             ),
-                            SizedBox(height:10),
+                            const SizedBox(height: 10),
                           ],
-
                         ),
                       ),
                     ),
@@ -224,46 +236,118 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
       ),
     );
   }
+}
 
-  Widget _buildPlaceItemWithTime({
-    required IconData icon,
-    required String title,
-    required String address,
-    required String time,
-  }) {
+// PlaceItem Widget
+class PlaceItem extends StatefulWidget {
+  final int index;
+  final IconData icon;
+  final String title;
+  final String address;
+  final String time;
+  final String reason;
+
+  const PlaceItem({
+    Key? key,
+    required this.index,
+    required this.icon,
+    required this.title,
+    required this.address,
+    required this.time,
+    required this.reason,
+  }) : super(key: key);
+
+  @override
+  _PlaceItemState createState() => _PlaceItemState();
+}
+
+class _PlaceItemState extends State<PlaceItem> {
+  bool _showReason = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0,0,0,10),
-      child: Row(
-        children: [
-          if (time != ' ')
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 10),
-              child: Column(
-                children: [
-                  const Icon(Icons.directions_walk, color: Colors.grey),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 40, // 고정된 가로 너비를 설정
-                    alignment: Alignment.center,
-                    child: Text(
-                      time,
-                      style: const TextStyle(color: Colors.grey),
-                      textAlign: TextAlign.center,
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _showReason = !_showReason; // reason의 표시 상태를 토글
+          });
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.time != ' ')
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 10),
+                child: Column(
+                  children: [
+                    const Icon(Icons.directions_walk, color: Colors.grey),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: 40,
+                      alignment: Alignment.center,
+                      child: Text(
+                        widget.time,
+                        style: const TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  )
+                  ],
+                ),
+              ),
+            if (widget.time == ' ')
+              const SizedBox(width: 50),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(widget.icon, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              widget.address,
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  AnimatedCrossFade(
+                    duration: const Duration(milliseconds: 200),
+                    firstChild: const SizedBox.shrink(),
+                    secondChild: Padding(
+                      padding: const EdgeInsets.all(5), // 적절한 패딩
+                      child: Text(
+                        '  →  '+widget.reason,
+                        style: const TextStyle(color: Colors.blue), // 파란 글씨
+                      ),
+                    ),
+                    crossFadeState: _showReason
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                  ),
                 ],
               ),
             ),
-          if(time == ' ')
-            SizedBox(width: 50),
-          Expanded(
-            child: ListTile(
-              leading: Icon(icon, color: Colors.red),
-              title: Text(title),
-              subtitle: Text(address),
-            ),
-          ),
-        ],
+
+          ],
+        ),
       ),
     );
   }
