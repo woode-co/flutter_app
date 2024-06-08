@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'woodeco',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/signin',
+      initialRoute: '/signup',
       onGenerateRoute: (settings) {
         if (settings.name == '/result') {
           final args = settings.arguments as Map<String, dynamic>;

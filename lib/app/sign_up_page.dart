@@ -86,9 +86,9 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
+            const SizedBox(height: 50),
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -100,9 +100,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
+            const SizedBox(height: 15),
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -115,8 +115,8 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
             Container(
-              margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-              decoration: BoxDecoration(
+              margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
                     color: Colors.grey,
@@ -126,13 +126,13 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: ListTile(
                 title: Text(formattedDate),
-                trailing: Icon(Icons.calendar_today),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context),
               ),
             ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -144,15 +144,22 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 5),
               child: ToggleButtons(
-                fillColor: Color.fromRGBO(255, 180, 180, 0.3),
+                fillColor: const Color.fromRGBO(255, 180, 180, 0.3),
                 borderColor: Colors.black54,
                 selectedBorderColor: Colors.black54,
                 selectedColor: Colors.black,
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
+                isSelected: [isMale, !isMale],
+                onPressed: (int index) {
+                  setState(() {
+                    isMale = index == 0;
+                  });
+                },
+                constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2 - 20),
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -177,18 +184,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                 ],
-                isSelected: [isMale, !isMale],
-                onPressed: (int index) {
-                  setState(() {
-                    isMale = index == 0;
-                  });
-                },
-                constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2 - 20),
               ),
             ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -200,16 +200,23 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ...List<Widget>.generate(7, (index) {
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 5),
                 child: ToggleButtons(
-                  fillColor: Color.fromRGBO(255, 180, 180, 0.3),
+                  fillColor: const Color.fromRGBO(255, 180, 180, 0.3),
                   borderColor: Colors.black54,
                   selectedBorderColor: Colors.black54,
                   selectedColor: Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  isSelected: [isSelected[index], !isSelected[index]],
+                  onPressed: (int idx) {
+                    setState(() {
+                      isSelected[index] = idx == 0;
+                    });
+                  },
+                  constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2 - 20),
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -234,13 +241,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
                   ],
-                  isSelected: [isSelected[index], !isSelected[index]],
-                  onPressed: (int idx) {
-                    setState(() {
-                      isSelected[index] = idx == 0;
-                    });
-                  },
-                  constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width / 2 - 20),
                 ),
               );
             }),
@@ -249,13 +249,13 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: const EdgeInsets.all(20),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(  // shape 속성을 추가
                     borderRadius: BorderRadius.circular(10),  // BorderRadius를 10으로 설정
                   ),
                 ),
                 onPressed: _submitData,
-                child: Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
