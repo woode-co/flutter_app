@@ -19,7 +19,24 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'woodeco',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/signup',
+      initialRoute: '/signin',
+      theme: ThemeData(
+        colorScheme: const ColorScheme(
+          primary: Color.fromARGB(255, 255, 172, 172), // Blue
+          
+          secondary: Color.fromARGB(255, 255, 165, 0), // Orange
+          
+          surface: Colors.white,
+          background: Colors.white,
+          error: Colors.red,
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Colors.black,
+          onBackground: Colors.black,
+          onError: Colors.white,
+          brightness: Brightness.light,
+        ),
+      ),
       onGenerateRoute: (settings) {
         if (settings.name == '/result') {
           final args = settings.arguments as Map<String, dynamic>;

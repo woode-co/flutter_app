@@ -176,12 +176,12 @@ class _ResultMapState extends State<ResultMap> {
         },
         initialCameraPosition: CameraPosition(
           target: LatLng(widget.result['itinerary'][0]['x'], widget.result['itinerary'][0]['y']),
-          zoom: 14,
+          zoom: 15,
         ),
         markers: _markers,
         polylines: {
           Polyline(
-            polylineId: PolylineId('route'),
+            polylineId: const PolylineId('route'),
             points: polylineCoordinates,
             color: Colors.blue,
             width: 5,

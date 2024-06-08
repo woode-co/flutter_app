@@ -43,9 +43,10 @@ dependencies:
   geolocator: ^9.0.0
   google_maps_flutter: ^2.0.6
   http: ^1.1.0
-  location: ^5.0.3
+  location: ^6.0.2
   flutter_polyline_points: ^2.0.0
   google_directions_api: ^0.10.0
+  time_range_picker: ^2.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

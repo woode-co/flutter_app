@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,6 +8,7 @@ import 'package:woodeco/app/token_manager.dart' as woodeco_token_manager;
 import 'package:http/http.dart' as http;
 import 'map_screen.dart'; // Import the MapScreen file
 import 'package:woodeco/app/result_page.dart';
+import 'package:time_range_picker/time_range_picker.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -58,7 +60,8 @@ class _MainPageState extends State<MainPage> {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
       _updateLocationText();
@@ -76,7 +79,7 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _sendPostRequest() async {
     String? userId = woodeco_token_manager.TokenManager.instance.accessToken;
-    if (userId == null){
+    if (userId == null) {
       print("No access token available");
       return;
     }
@@ -118,8 +121,10 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<String> _getAddressFromLatLng(LatLng latLng) async {
-    const String apiKey = 'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw';  // Replace with your Google Maps API key
-    final String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
+    const String apiKey =
+        'AIzaSyCJavimIFYZyiAVYixMbLIHQlao--W0DTw'; // Replace with your Google Maps API key
+    final String url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey&language=ko';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -171,7 +176,7 @@ class _MainPageState extends State<MainPage> {
     );
     if (result != null) {
       setState(() {
-        _currentPosition = result as LatLng;  // 상태 변수 업데이트
+        _currentPosition = result as LatLng; // 상태 변수 업데이트
         _updateLocationText();
       });
     }
@@ -188,9 +193,9 @@ class _MainPageState extends State<MainPage> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white,
-                      Color(0xffFFD7D7),
-                    ])),
+                  Colors.white,
+                  Color(0xffFFD7D7),
+                ])),
           ),
           Center(
             child: IconButton(
@@ -206,53 +211,55 @@ class _MainPageState extends State<MainPage> {
                   children: [
                     SizedBox(height: 300),
                     SizedBox(height: 20),
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(
+                      color: Color.fromARGB(255, 255, 164, 157),
+                    ),
                     SizedBox(height: 10),
                     Text(
                       'AI에게 추천받는 중',
-                      style: TextStyle(fontSize: 16),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ]),
             ),
           if (!_isButtonPressed)
             const Center(
               child: Column(children: [
-                SizedBox(height: 300),
-                SizedBox(height: 20),
-                SizedBox(height: 10),
+                SizedBox(height: 290),
                 Text(
                   '터치하여 데이트하기',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ]),
             ),
-          if (!_isButtonPressed) MapBottomSheet(
-              currentPosition: _currentPosition,
-              locationController: _locationController,
-              selectedDate: _selectedDate,
-              startTime: _startTime,
-              endTime: _endTime,
-              onDateChanged: (date) {
-                setState(() {
-                  _selectedDate = date;
-                });
-              },
-              onStartTimeChanged: (time) {
-                setState(() {
-                  _startTime = time;
-                });
-              },
-              onEndTimeChanged: (time) {
-                setState(() {
-                  _endTime = time;
-                });
-              },
-              onLocationChanged: (position) {
-                setState(() {
-                  _currentPosition = position;
-                  _updateLocationText();
-                });
-              }),
+          if (!_isButtonPressed)
+            MapBottomSheet(
+                currentPosition: _currentPosition,
+                locationController: _locationController,
+                selectedDate: _selectedDate,
+                startTime: _startTime,
+                endTime: _endTime,
+                onDateChanged: (date) {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                },
+                onStartTimeChanged: (time) {
+                  setState(() {
+                    _startTime = time;
+                  });
+                },
+                onEndTimeChanged: (time) {
+                  setState(() {
+                    _endTime = time;
+                  });
+                },
+                onLocationChanged: (position) {
+                  setState(() {
+                    _currentPosition = position;
+                    _updateLocationText();
+                  });
+                }),
         ],
       ),
     );
@@ -292,7 +299,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   late double _startHeight;
 
   final double _lowLimit = 100;
-  final double _highLimit = 800;
+  final double _highLimit = 500;
 
   @override
   void initState() {
@@ -333,18 +340,37 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
     }
   }
 
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
-    final TimeOfDay? picked = await showTimePicker(
+  Future<void> _selectTime(BuildContext context) async {
+    TimeRange? result = await showTimeRangePicker(
       context: context,
-      initialTime: isStartTime ? widget.startTime : widget.endTime,
+      ticks: 12,
+      ticksColor: Colors.grey,
+      ticksOffset: -12,
+      strokeColor: const Color.fromARGB(255, 255, 175, 175),
+      handlerColor: const Color.fromARGB(255, 255, 147, 147),
+      selectedColor: const Color.fromARGB(255, 251, 146, 146),
+      start: widget.startTime,
+      end: widget.endTime,
+      minDuration: const Duration(hours: 2),
+      maxDuration: const Duration(hours: 8),
+      labels: ["24 h", "3 h", "6 h", "9 h", "12 h", "15 h", "18 h", "21 h"]
+          .asMap()
+          .entries
+          .map((e) {
+        return ClockLabel.fromIndex(idx: e.key, length: 8, text: e.value);
+      }).toList(),
+      labelOffset: -30,
+      disabledTime: TimeRange(
+          startTime: const TimeOfDay(hour: 22, minute: 0),
+          endTime: const TimeOfDay(hour: 5, minute: 0)),
+      disabledColor: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.5),
     );
-    if (picked != null) {
-      if (isStartTime) {
-        widget.onStartTimeChanged(picked);
-      } else {
-        widget.onEndTimeChanged(picked);
-      }
+    if (result != null) {
+      widget.onStartTimeChanged(result.startTime);
+      widget.onEndTimeChanged(result.endTime);
     }
+
+    print("result $result");
   }
 
   Future<void> _selectLocation(BuildContext context) async {
@@ -401,72 +427,62 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                   child: Column(
                     children: [
                       // Location Selection
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: widget.locationController,
-                              decoration: const InputDecoration(
-                                hintText: 'Location',
-                                labelText: '현재 위치',
-                              ),
-                              readOnly: true,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.search),
-                            onPressed: () => _selectLocation(context),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.map,
+                            color: Color.fromARGB(255, 255, 148, 148),
+                            size: 100),
+                        onPressed: () => _selectLocation(context),
                       ),
+
+                      TextField(
+                        controller: widget.locationController,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        decoration: const InputDecoration(
+                          labelText: '데이트 장소',
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 255, 165, 165))),
+                        ),
+                        readOnly: true,
+                      ),
+
                       const SizedBox(height: 16.0),
 
                       // Date Selection
-                      const Text(
-                        '데이트할 날짜를 선택해 주세요!',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
+
                       Row(
                         children: [
-                          Text(DateFormat('yyyy-MM-dd').format(widget.selectedDate)),
-                          IconButton(
-                            icon: const Icon(Icons.calendar_today),
-                            onPressed: () => _selectDate(context),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.calendar_today,
+                                      color: Color.fromARGB(255, 255, 148, 148),
+                                      size: 100),
+                                  onPressed: () => _selectDate(context),
+                                ),
+                                Text(DateFormat('   yyyy년\nMM월 dd일')
+                                    .format(widget.selectedDate),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                              ],
+                            ),
                           ),
+                          Expanded(
+                              child: Column(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.access_time,
+                                    color: Color.fromARGB(255, 255, 148, 148),
+                                    size: 100),
+                                onPressed: () => _selectTime(context),
+                              ),
+                              Text('FROM ${widget.startTime.format(context)}',style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                              Text('TO ${widget.endTime.format(context)}',style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),)
+                            ],
+                          ))
                         ],
                       ),
-                      const SizedBox(height: 16.0),
 
                       // Time Selection
-                      const Text(
-                        '데이트 시간을 정해주세요!',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text('시작 시간: ${widget.startTime.format(context)}'),
-                              ElevatedButton(
-                                onPressed: () => _selectTime(context, true),
-                                child: const Text('Select Start Time'),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text('끝나는 시간: ${widget.endTime.format(context)}'),
-                              ElevatedButton(
-                                onPressed: () => _selectTime(context, false),
-                                child: const Text('Select End Time'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -10,7 +11,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _controller;
-  final LatLng _initialPosition = const LatLng(37.5642, 127.0016); // Default to a location
+  final LatLng _initialPosition = const LatLng(37.5492209, 126.9353154); // Default to a location
   late LatLng _lastMapPosition;
   bool _isMapCreated = false;
 
@@ -24,7 +25,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Location on Map'),
+        title: const Text('데이트할 지역을 선택해주세요'),
       ),
       body: Stack(
         children: [

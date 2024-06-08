@@ -51,7 +51,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
   late double _startHeight;
 
   final double _lowLimit = 100;
-  final double _highLimit = 800;
+  final double _highLimit = 600;
 
   @override
   void initState() {
@@ -172,13 +172,13 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             '추천 데이트 코스',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -334,7 +334,7 @@ class _PlaceItemState extends State<PlaceItem> {
                     secondChild: Padding(
                       padding: const EdgeInsets.all(5), // 적절한 패딩
                       child: Text(
-                        '  →  '+widget.reason,
+                        '  →  ${widget.reason}',
                         style: const TextStyle(color: Colors.blue), // 파란 글씨
                       ),
                     ),
