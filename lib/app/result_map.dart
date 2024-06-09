@@ -183,7 +183,7 @@ class _ResultMapState extends State<ResultMap> {
           Polyline(
             polylineId: const PolylineId('route'),
             points: polylineCoordinates,
-            color: Colors.blue,
+            color: const Color.fromARGB(255, 255, 150, 150),
             width: 5,
           ),
         },

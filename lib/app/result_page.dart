@@ -218,7 +218,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                                     '총 이동시간 ${travelTimes.reduce((a, b) => a + b)}분'),
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 50),
-                                  backgroundColor: Colors.blue,
+                                  backgroundColor: const Color.fromARGB(255, 255, 246, 246),
                                 ),
                               ),
                             ),
