@@ -128,6 +128,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
         .toList(); // Note: LatLng uses (latitude, longitude)
     List<String> places =
     itinerary.map<String>((item) => item['location'] as String).toList();
+    List<String> when = itinerary.map<String>((item) => item['time'] as String).toList();
     List<String> reasons = List<Map<String, dynamic>>.from(widget.result['reasoning'])
         .map<String>((item) => item['reason'] as String)
         .toList();
@@ -206,6 +207,7 @@ class _MapBottomSheetState extends State<MapBottomSheet> {
                                       ? ' '
                                       : '${travelTimes[index - 1]}분', // Add time for all except the first item
                                   reason: reasons[index],
+                                  when: when[index]
                                 );
                               },
                             ),
@@ -246,6 +248,7 @@ class PlaceItem extends StatefulWidget {
   final String address;
   final String time;
   final String reason;
+  final String when;
 
   const PlaceItem({
     Key? key,
@@ -255,6 +258,7 @@ class PlaceItem extends StatefulWidget {
     required this.address,
     required this.time,
     required this.reason,
+    required this.when,
   }) : super(key: key);
 
   @override
@@ -312,7 +316,7 @@ class _PlaceItemState extends State<PlaceItem> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.title,
+                              '${widget.when} ${widget.title}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

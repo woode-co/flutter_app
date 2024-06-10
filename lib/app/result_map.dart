@@ -26,13 +26,15 @@ class _ResultMapState extends State<ResultMap> {
   void initState() {
     super.initState();
     _initMarkersAndRoute();
-    getPolyPoints();
   }
 
   void _initMarkersAndRoute() {
     final itinerary = widget.result['itinerary'];
     print('Initializing markers and route with itinerary: $itinerary');
-
+    final coordinates = widget.result['coordinates'];
+    for (var coordinate in coordinates){
+      polylineCoordinates.add(LatLng(coordinate[1], coordinate[0]));
+    }
     for (var point in itinerary) {
       final marker = Marker(
         markerId: MarkerId(point['location']),
@@ -46,82 +48,6 @@ class _ResultMapState extends State<ResultMap> {
     }
     print('Markers initialized: $_markers');
     print('Route points initialized: $_routePoints');
-  }
-
-  Future<void> getPolyPoints() async {
-    final List<LatLng> newPolylineCoordinates = [];
-
-    try {
-      for (int i = 0; i < _routePoints.length - 1; i++) {
-        final response = await http.get(
-          Uri.parse(
-            'https://maps.googleapis.com/maps/api/directions/json'
-                '?origin=${_routePoints[i].latitude},${_routePoints[i].longitude}'
-                '&destination=${_routePoints[i + 1].latitude},${_routePoints[i + 1].longitude}'
-                '&mode=transit'
-                '&key=$googleApiKey',
-          ),
-        );
-
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          if (data['status'] == 'OK') {
-            final points = data['routes'][0]['overview_polyline']['points'];
-            final path = decodePolyline(points);
-            newPolylineCoordinates.addAll(path);
-          } else {
-            print('No route found between ${_routePoints[i]} and ${_routePoints[i + 1]}');
-          }
-        } else {
-          throw Exception('Failed to load directions');
-        }
-      }
-
-      if (newPolylineCoordinates.isEmpty) {
-        _showNoRouteFoundDialog();
-      } else {
-        setState(() {
-          polylineCoordinates = newPolylineCoordinates;
-        });
-      }
-    } catch (e) {
-      print('Error fetching polyline points: $e');
-      _showErrorDialog(e.toString());
-    }
-
-    print('Polyline coordinates: $polylineCoordinates');
-  }
-
-  List<LatLng> decodePolyline(String encoded) {
-    List<LatLng> polyline = [];
-    int index = 0, len = encoded.length;
-    int lat = 0, lng = 0;
-
-    while (index < len) {
-      int b, shift = 0, result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      LatLng point = LatLng((lat / 1E5), (lng / 1E5));
-      polyline.add(point);
-    }
-
-    return polyline;
   }
 
   void _showNoRouteFoundDialog() {
